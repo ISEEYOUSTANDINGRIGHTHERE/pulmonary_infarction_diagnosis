@@ -1,7 +1,7 @@
 import pandas as pd
 #im loading the csv file from the url
 def load_data(url):
-    url="https://stanfordaimi.azurewebsites.net/datasets/3a7548a4-8f65-4ab7-85fa-3d68c9efc1bd"
+    url="https://stanfordaimi.azurewebsites.net/datasets/3a7548a4-8f65-4ab7-85fa-3d68c9efc1bd" #use url in a csv format->but there is no csv on the webpage
     data = pd.read_csv(url)
     return data
 
@@ -12,7 +12,7 @@ def preprocess_data(data):
     return data
 
 if __name__== "__main__":
-    raw_data_url = "https://stanfordaimi.azurewebsites.net/datasets/3a7548a4-8f65-4ab7-85fa-3d68c9efc1bd"
+    raw_data_url = "https://stanfordaimi.azurewebsites.net/datasets/3a7548a4-8f65-4ab7-85fa-3d68c9efc1bd" #can use path to csv outformat->check
     processed_data_path = "data/processed/processed_data.csv"
 
     data = load_data(raw_data_url)
