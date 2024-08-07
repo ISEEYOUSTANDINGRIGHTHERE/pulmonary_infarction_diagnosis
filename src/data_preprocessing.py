@@ -8,6 +8,8 @@ def preprocess_data(data):
     #we're preprocessing the data steps
     data = data.dropna() #dropna exlcudes all the missing values from the dataset we've basically downloaded
     data = pd.get_dummies(data) #Each category level gets its own column, with a 1 indicating the presence of that category and a 0 indicating its absence.
+    print("Data preview after preprocessing:\n", data.head())
+    print("Data columns after preprocessing:\n", data.columns)
     return data
 
 if __name__== "__main__":
@@ -17,3 +19,5 @@ if __name__== "__main__":
     data = load_data(raw_data_path)
     data = preprocess_data(data)
     data.to_csv(processed_data_path, index=False)
+
+    print("Preprocessing complete. Processed data saved to:", processed_data_path)
