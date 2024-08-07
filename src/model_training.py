@@ -39,3 +39,4 @@ if __name__=="__main__":
     print(f"ROC AUC Score: {roc_auc}")  
 
     joblib.dump(model,'random_forest_model.pkl') #saving the model for preview purpose in the future
+    joblib.dump(X_train.columns, 'training_columns.pkl')

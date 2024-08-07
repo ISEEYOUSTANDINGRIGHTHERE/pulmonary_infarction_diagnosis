@@ -21,7 +21,7 @@ def make_predictions(new_data):
 
 if __name__ == "__main__":
     # Example new patient data
-    new_patient_data_path = r"D:\\PulmonaryInfarction\\multimodalpulmonaryembolismdataset\\new_patient_data.csv"
+    new_patient_data_path = r"D:\\PulmonaryInfarction\\multimodalpulmonaryembolismdataset\\processed_multimodalpulmonaryembolismdataset.csv"
     new_patient_data = pd.read_csv(new_patient_data_path)
     
     predictions = make_predictions(new_patient_data)
