@@ -1,3 +1,4 @@
+import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -35,4 +36,6 @@ if __name__=="__main__":
 
     print(f"Accuracy: {accuracy}")
     print(f"Confusion Matrix: \n{cm}")
-    print(f"ROC AUC Score: {roc_auc}")
+    print(f"ROC AUC Score: {roc_auc}")  
+
+    joblib.dump(model,'random_forest_model.pkl') #saving the model for preview purpose in the future
