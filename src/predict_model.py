@@ -25,4 +25,8 @@ if __name__ == "__main__":
     new_patient_data = pd.read_csv(new_patient_data_path)
     
     predictions = make_predictions(new_patient_data)
-    print(predictions)
+    new_patient_data['predictions']= predictions
+    predictions_output_path=r"D:\\PulmonaryInfarction\\multimodalpulmonaryembolismdataset\\predictions_output.csv"
+    new_patient_data.to_csv(predictions_output_path, index=False)
+    
+    print(f"Predictions saved to {predictions_output_path}")
