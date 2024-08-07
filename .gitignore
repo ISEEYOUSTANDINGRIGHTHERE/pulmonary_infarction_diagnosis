@@ -3,3 +3,4 @@ __pycache__/
 data/raw/*
 data/processed/*
 *.pyc
+src/Untitled-2.py
