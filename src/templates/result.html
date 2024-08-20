@@ -4,10 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction Result</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: {% if image_url %} url('{{ image_url }}') no-repeat center center fixed; {% else %} #f8f9fa; {% endif %}
+            background-size: cover;
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
 </head>
 <body>
-    <h1>Prediction Result</h1>
-    <p>{{ prediction }}</p>
-    <a href="/">Go Back</a>
+    <div class="container">
+        <div class="card">
+            <h1>Prediction Result</h1>
+            <p class="lead">{{ prediction_text }}</p>
+            <hr>
+            <p><strong>Patient ID:</strong> {{ patient_id }}</p>
+            <p><strong>Age:</strong> {{ age }}</p>
+            <p><strong>Sex:</strong> {{ sex }}</p>
+            <a href="/" class="btn btn-primary mt-4">Make Another Prediction</a>
+        </div>
+    </div>
 </body>
 </html>

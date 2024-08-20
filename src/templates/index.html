@@ -3,19 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict Pulmonary Infarction</title>
+    <title>Pulmonary Infarction Detection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: {% if image_url %} url('{{ image_url }}') no-repeat center center fixed; {% else %} none; {% endif %}
+            background-size: cover;
+        }
+
+        .bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding-top: 100px;
+            color: white;
+            text-align: center;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
 </head>
 <body>
-    <h1>Predict Pulmonary Infarction</h1>
-    <form action="/predict" method="post">
-        <!-- Add form fields for each feature in your dataset -->
-        <!-- Example: -->
-        <label for="age">Age:</label>
-        <input type="text" id="age" name="age"><br><br>
-        <label for="sex">Sex:</label>
-        <input type="text" id="sex" name="sex"><br><br>
-        <!-- Add more fields as required -->
-        <input type="submit" value="Predict">
-    </form>
+    {% if not prediction_text %}
+    <video autoplay muted loop class="bg-video">
+        <source src="{{ url_for('static', filename='background-video.mp4') }}" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    {% endif %}
+
+    <div class="container">
+        {% if prediction_text %}
+        <div class="card">
+            <h1>Prediction Result</h1>
+            <p class="lead">{{ prediction_text }}</p>
+            <hr>
+            <p><strong>Patient ID:</strong> {{ patient_id }}</p>
+            <p><strong>Age:</strong> {{ age }}</p>
+            <p><strong>Sex:</strong> {{ sex }}</p>
+            <a href="/" class="btn btn-primary mt-4">Make Another Prediction</a>
+        </div>
+        {% else %}
+        <div class="text-center mb-4">
+            <h1>Pulmonary Infarction Early Detection</h1>
+            <p class="lead">Enter patient details to get a prediction.</p>
+        </div>
+        <div class="card">
+            <form action="/" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="patient_id">Patient ID</label>
+                    <input type="text" class="form-control" id="patient_id" name="patient_id" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="text" class="form-control" id="age" name="age" required>
+                </div>
+                <div class="form-group">
+                    <label for="sex">Sex</label>
+                    <input type="text" class="form-control" id="sex" name="sex" required>
+                </div>
+                <div class="form-group">
+                    <label for="image">Upload Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Predict</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
