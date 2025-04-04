@@ -13,7 +13,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def preprocess_new_data(new_data, training_columns):
     new_data = pd.get_dummies(new_data)
     missing_cols = set(training_columns) - set(new_data.columns)
-    for col in missing_cols:
+    for col in missing_cols: 
         new_data[col] = 0
     new_data = new_data[training_columns]
     return new_data

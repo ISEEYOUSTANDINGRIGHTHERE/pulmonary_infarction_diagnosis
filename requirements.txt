@@ -1,0 +1,31 @@
+# General utilities
+numpy==1.24.4
+pandas==1.5.3
+matplotlib==3.7.2
+
+# Machine learning
+scikit-learn==1.2.2
+
+# Deep learning for Phase 2
+tensorflow==2.13.0
+
+# Image processing
+opencv-python==4.8.0.76
+scikit-image==0.21.0
+
+# Explainable AI (XAI)
+shap==0.42.1
+
+# API development (FastAPI)
+fastapi==0.95.2
+uvicorn==0.22.0
+
+# Additional tools for Phase 2
+pillow==9.5.0
+
+# For Android Studio App Development
+# (Include this only if using Python-Kivy or related frameworks for app)
+kivy==2.2.0  # Optional: If you use Kivy for cross-platform apps
+
+# Version control helpers (Optional but useful)
+gitpython==3.1.31
