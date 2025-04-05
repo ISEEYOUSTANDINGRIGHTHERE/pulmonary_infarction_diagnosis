@@ -35,7 +35,7 @@ for epoch in range(epochs):
 
     if avg_loss < best_loss:
         best_loss = avg_loss
-        os.makedirs('models/saved_models', exist_ok=True)
-        torch.save(model.state_dict(), 'models/saved_models/best_model.pth')
-        print("✅ Saved new best model")
+        os.makedirs('C:\Users\Akash\OneDrive\Documents\GitHub\pulmonary_infarction_diagnosis\phase_2\src\models\saved_models', exist_ok=True)
+        torch.save(model.state_dict(), 'C:\Users\Akash\OneDrive\Documents\GitHub\pulmonary_infarction_diagnosis\phase_2\src\models\saved_models/best_model.pth')
+        print(" Saved new best model")
 
