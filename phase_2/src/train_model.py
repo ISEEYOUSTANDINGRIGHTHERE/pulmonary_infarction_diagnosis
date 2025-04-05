@@ -5,7 +5,8 @@ from torchvision import datasets, transforms, models
 import os
 
 # Step 1: Create necessary directories
-os.makedirs('models/saved_models', exist_ok=True)
+os.makedirs('src/models/saved_models', exist_ok=True)
+save_path = os.path.join('src', 'models', 'saved_models', 'best_model.pth')
 
 # Step 2: Define data transforms
 transform = transforms.Compose([
@@ -13,13 +14,18 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-# Step 3: Load dummy dataset (you should replace this with your actual dataset)
+# Step 3: Load dummy dataset (replace this with your real data loader)
 train_dataset = datasets.FakeData(transform=transform)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=8, shuffle=True)
 
-# Step 4: Define model (for example, a pretrained ResNet18)
+# Step 4: Define model
 model = models.resnet18(pretrained=False)
-model.fc = nn.Linear(model.fc.in_features, 2)  # Adjust for binary classification
+model.fc = nn.Linear(model.fc.in_features, 2)
+
+# Load checkpoint if exists
+if os.path.exists(save_path):
+    print("Loading existing model weights...")
+    model.load_state_dict(torch.load(save_path))
 
 # Step 5: Define loss and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -46,6 +52,5 @@ for epoch in range(epochs):
     print(f"Epoch {epoch+1}/{epochs}, Loss: {running_loss/len(train_loader)}")
 
 # Step 7: Save the model
-save_path = 'models/saved_models/best_model.pth'
 torch.save(model.state_dict(), save_path)
 print(f"Model saved to {save_path}")
