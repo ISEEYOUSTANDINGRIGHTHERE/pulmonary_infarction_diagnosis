@@ -1,11 +1,34 @@
+# Core
 fastapi
-uvicorn
+uvicorn[standard]
+python-multipart
+
+# Deep Learning
 torch
+torchvision
+torchaudio
+
+# Medical Imaging
 pydicom
+nibabel
+scikit-image
+opencv-python-headless
+
+# Data Processing
 numpy
-SimpleITK
+pandas
 scikit-learn
-opencv-python
-monai
+
+# Visualization
+matplotlib
+seaborn
+
+# Explainable AI
 shap
 grad-cam
+
+# Pydantic for FastAPI models
+pydantic
+
+# File handling
+aiofiles
