@@ -6,7 +6,7 @@ from src.model_training_3d import PulmonaryModel
 
 app = FastAPI()
 model = PulmonaryModel()
-model.load_state_dict(torch.load("models/saved_models/best_model.pth"))
+model.load_state_dict(torch.load("C:\\Users\\Akash\\OneDrive\\Documents\\GitHub\\pulmonary_infarction_diagnosis\\phase_2\\src\\models\\saved_models\\best_model.pth"))
 model.eval()
 
 @app.post("/predict/")
