@@ -43,3 +43,6 @@ async def analyze(file: UploadFile = File(...)):
         "prediction": "Probable Pulmonary Infarction" if prediction else "No PI",
         "stage": stage
     }
+end stage.
+
+qkash
