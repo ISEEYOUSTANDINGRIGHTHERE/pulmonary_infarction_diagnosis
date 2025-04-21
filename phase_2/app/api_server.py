@@ -1,40 +1,36 @@
-# app/api_server.py
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import HTMLResponse
-import shutil, os
+from fastapi import FastAPI
+from src.utils.dicom_reader import load_dicom_series
+from src.utils.dicom_loader import normalize, resize_volume
+import os
 import torch
-from src.utils.dicom_loader import load_dicom_series
-from src.utils.image_preprocessing import resize_volume, normalize
-from src.xai.grad_cam import GradCAM
-from torch import nn
-import numpy as np
 
 app = FastAPI()
 
-# Load model
-model = torch.load("models/ct_model.pth", map_location=torch.device('cpu'))
-target_layer = model.features[-1]  # adjust depending on your model
-gradcam = GradCAM(model, target_layer)
+# Dummy model — replace with your trained one
+def dummy_model(volume_tensor):
+    return torch.tensor([0.7])  # Placeholder
 
-@app.get("/", response_class=HTMLResponse)
-async def root():
-    with open("app/templates/upload.html") as f:
-        return HTMLResponse(content=f.read())
+@app.get("/predict_all")
+def predict_all_patients():
+    parent_dir = "D:\\PulmonaryInfarction\\Phase2dataset"
+    results = {}
 
-@app.post("/analyze/")
-async def analyze(file: UploadFile = File(...)):
-    save_path = f"temp_upload.dcm"
-    with open(save_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    for patient_folder in os.listdir(parent_dir):
+        patient_path = os.path.join(parent_dir, patient_folder)
 
-    volume, _ = load_dicom_series("data/sample_ct_scan/")  # replace if folder is uploaded
-    volume = normalize(resize_volume(volume))
-    volume_tensor = torch.tensor(volume).unsqueeze(0).unsqueeze(0)  # [1,1,D,H,W]
+        if os.path.isdir(patient_path):
+            try:
+                volume, _ = load_dicom_series(patient_path)
+                volume = normalize(resize_volume(volume))  # resize & normalize
+                volume_tensor = torch.tensor(volume).unsqueeze(0).unsqueeze(0)  # shape: [1,1,D,H,W]
+                
+                prediction = dummy_model(volume_tensor)
+                results[patient_folder] = float(prediction.item())
 
-    output = model(volume_tensor)
-    prediction = torch.argmax(output).item()
-    stage = "Early" if prediction == 0 else "Advanced"  # dummy logic
+            except Exception as e:
+                results[patient_folder] = f"Error: {str(e)}"
 
+<<<<<<< Updated upstream
     cam = gradcam.generate_cam(volume_tensor)
     # Save a cam slice as preview (could be the middle slice)
     plt.imsave("app/static/cam_preview.png", cam[cam.shape[0]//2], cmap='jet')
@@ -46,3 +42,6 @@ async def analyze(file: UploadFile = File(...)):
 end stage.
 
 qkash
+=======
+    return results
+>>>>>>> Stashed changes

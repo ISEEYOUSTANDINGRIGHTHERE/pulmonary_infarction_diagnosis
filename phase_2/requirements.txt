@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydicom
+numpy
+torch
+torchvision
+matplotlib
+opencv-python
+python-multipart
+shap
+nibabel
