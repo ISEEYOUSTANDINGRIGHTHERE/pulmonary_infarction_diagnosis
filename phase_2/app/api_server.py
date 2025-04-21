@@ -31,6 +31,7 @@ def predict_all_patients():
                 results[patient_folder] = f"Error: {str(e)}"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     cam = gradcam.generate_cam(volume_tensor)
     # Save a cam slice as preview (could be the middle slice)
     plt.imsave("app/static/cam_preview.png", cam[cam.shape[0]//2], cmap='jet')
@@ -39,9 +40,3 @@ def predict_all_patients():
         "prediction": "Probable Pulmonary Infarction" if prediction else "No PI",
         "stage": stage
     }
-end stage.
-
-qkash
-=======
-    return results
->>>>>>> Stashed changes
