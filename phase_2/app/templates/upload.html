@@ -1,21 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="/static/ct_style.css" />
+    <meta charset="UTF-8">
+    <title>Upload Lung DICOM</title>
 </head>
 <body>
-  <form action="/analyze/" method="post" enctype="multipart/form-data" onsubmit="showLoader()">
-    <input type="file" name="file" required>
-    <button type="submit">Analyze CT</button>
-  </form>
-
-  <div id="loader" style="display:none;">
-    <p>Processing... Please wait ⏳</p>
-  </div>
-
-  <script>
-    function showLoader() {
-      document.getElementById('loader').style.display = 'block';
-    }
-  </script>
+    <h1>Upload Lung CT Scan (.dcm)</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".dcm" required>
+        <br><br>
+        <button type="submit">Upload and Diagnose</button>
+    </form>
 </body>
 </html>

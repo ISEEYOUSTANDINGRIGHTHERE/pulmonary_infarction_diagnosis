@@ -1,72 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pulmonary Infarction Results</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #eef2f3;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        li strong {
-            color: #2c3e50;
-        }
-        .error {
-            color: red;
-        }
-        .no-results {
-            font-style: italic;
-            color: #555;
-        }
-        a {
-            text-decoration: none;
-            color: #3498db;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Prediction Result</title>
 </head>
 <body>
-    <div class="container">
-        <h2>Pulmonary Infarction Prediction Results</h2>
-        {% if result %}
-            <ul>
-                {% for patient, value in result.items() %}
-                    <li>
-                        <strong>{{ patient }}</strong>: 
-                        {% if "Error" in value|string %}
-                            <span class="error">{{ value }}</span>
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-results">No predictions yet. <a href="/predict_all">Run prediction</a></p>
-        {% endif %}
-    </div>
+    <h2>Prediction Result 🎯</h2>
+    <p><strong>Prediction:</strong> {{ prediction }}</p>
+    <p><strong>Stage:</strong> {{ stage }}</p>
+    
+    <h3>Heatmap 🔥:</h3>
+    <img src="{{ heatmap_path }}" alt="Heatmap" style="max-width: 500px;">
+    
+    <br><br>
+    <a href="/">Upload another file</a>
 </body>
 </html>
