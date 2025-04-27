@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 app = Flask(__name__)
-model = joblib.load('random_forest_model.pkl')
+model = joblib.load("C:\\Users\\Akash\\OneDrive\\Documents\\GitHub\\pulmonary_infarction_diagnosis\\src\\random_forest_model.pkl")
 training_columns = joblib.load('training_columns.pkl')
 
 UPLOAD_FOLDER = 'static/uploads'
