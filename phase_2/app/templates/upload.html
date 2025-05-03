@@ -1,15 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Upload Lung DICOM</title>
+    <title>Upload DICOM ZIP</title> <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef3f7;
+            text-align: center;
+            padding-top: 100px;
+        }
+        .box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0288d1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0277bd;
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload Lung CT Scan (.dcm)</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".dcm" required>
-        <br><br>
-        <button type="submit">Upload and Diagnose</button>
-    </form>
+    <div class="box">
+        <h2>Upload DICOM Files (as .zip archive)</h2>
+        <form action="/predict_patient" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".zip" required><br> <button type="submit">Diagnose</button>
+        </form>
+    </div>
 </body>
 </html>

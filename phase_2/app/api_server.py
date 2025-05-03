@@ -1,190 +1,239 @@
-import sys
 import os
-import uuid
-from pathlib import Path
-import shutil
 import torch
-from fastapi import FastAPI, File, UploadFile, Request, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse
+import shutil
+import tempfile
+import zipfile # To handle ZIP uploads
+import time # For unique identifiers if needed elsewhere
+import traceback # For detailed error logging
+from fastapi import FastAPI, Request, File, UploadFile, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.status import HTTP_303_SEE_OTHER
+import numpy as np # For random int in timestamp if needed elsewhere
 
-# Add project root to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from models.cnn_model import PulmonaryInfarction3DCNN
-from src.utils.dicom_loader import get_views
-from src.inference import full_inference_with_explanation
-
-# Constants
-UPLOAD_FOLDER = Path("uploads")
-UPLOAD_FOLDER.mkdir(exist_ok=True)
-OUTPUT_FOLDER = Path("outputs")
-OUTPUT_FOLDER.mkdir(exist_ok=True)
-MODEL_PATH = "models/trained_model.pth"  # Update with actual path
-
-# Initialize FastAPI
-app = FastAPI(
-    title="Pulmonary Infarction Detection API",
-    description="API for detecting pulmonary infarction from DICOM CT scans",
-    version="0.1.0"
-)
-
-# Add static files mount
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
-# Initialize templates
-templates = Jinja2Templates(directory="app/templates")
-
-# Task status tracking
-task_status = {}
-
-# Load model once at startup
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Assuming model and inference are structured as per previous discussions
 try:
-    model = PulmonaryInfarction3DCNN()
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-    model.to(device)
-    model.eval()
-    model_loaded = True
+    # Make sure the current directory (phase_2) is in the path if needed
+    import sys
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Check if running directly vs via uvicorn might change expected root
+    current_working_dir = os.getcwd()
+    if project_root not in sys.path and os.path.basename(current_working_dir) == 'phase_2':
+         # Add project root if running from phase_2 dir
+         sys.path.insert(0, project_root)
+         print(f"Project Root added to sys.path: {project_root}")
+    elif os.path.dirname(current_working_dir) not in sys.path:
+         # Add parent of 'app' dir if running from elsewhere perhaps
+         sys.path.insert(0, os.path.dirname(current_working_dir))
+         print(f"Parent of 'app' dir added to sys.path: {os.path.dirname(current_working_dir)}")
+
+
+    from models.cnn_model import PulmonaryInfarction3DCNN
+    from src.inference import full_inference_with_explanation
+except ImportError as e:
+     print(f"ERROR: Failed to import necessary modules: {e}")
+     print("Ensure cnn_model.py and inference.py are in the correct locations (models/ and src/).")
+     PulmonaryInfarction3DCNN = None
+     full_inference_with_explanation = None
+
+# --- Configuration ---
+OUTPUT_FOLDER = "outputs"
+UPLOAD_FOLDER = "uploads"
+MODEL_PATH = "models/pulmonary_model.pth" # Corrected folder name
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+NUM_CLASSES = 4 # Example: NoPI, S1, S2, S3
+
+# --- FastAPI App Initialization ---
+app = FastAPI()
+
+# --- Template Configuration ---
+templates = None
+try:
+    current_script_dir = os.path.dirname(os.path.abspath(__file__))
+    templates_dir = os.path.join(current_script_dir, "templates")
+    templates = Jinja2Templates(directory=templates_dir)
+    print("-" * 30)
+    print(f"DEBUG: Jinja2Templates configured.")
+    if hasattr(templates, 'env') and hasattr(templates.env, 'loader') and hasattr(templates.env.loader, 'searchpath'):
+        print(f"Resolved search path: {templates.env.loader.searchpath}")
+    else:
+        print("Could not access Jinja2 environment search path for debugging.")
+    print(f"Current Working Directory: {os.getcwd()}")
+    print("-" * 30)
 except Exception as e:
-    print(f"Error loading model: {e}")
-    model_loaded = False
-    model = None
+    print(f"ERROR setting up Jinja2Templates: {e}")
+
+
+# --- Static File Serving ---
+try:
+    # Ensure OUTPUT_FOLDER path is relative to where uvicorn runs (phase_2)
+    static_dir_path = os.path.join(os.getcwd(), OUTPUT_FOLDER) if os.path.basename(os.getcwd()) == 'phase_2' else OUTPUT_FOLDER
+    os.makedirs(static_dir_path, exist_ok=True)
+    app.mount(f"/{OUTPUT_FOLDER}", StaticFiles(directory=static_dir_path), name=OUTPUT_FOLDER)
+    print(f"Mounted static directory '{static_dir_path}' at '/{OUTPUT_FOLDER}'")
+except Exception as e:
+     print(f"ERROR mounting static directory '{OUTPUT_FOLDER}': {e}")
+
+# --- Model Loading ---
+model = None
+if PulmonaryInfarction3DCNN: # Check if import succeeded
+    # Ensure MODEL_PATH is relative to where uvicorn runs (phase_2)
+    model_load_path = os.path.join(os.getcwd(), MODEL_PATH) if os.path.basename(os.getcwd()) == 'phase_2' else MODEL_PATH
+    print(f"Loading model from: {model_load_path} onto device: {DEVICE}")
+    try:
+        model = PulmonaryInfarction3DCNN(num_classes=NUM_CLASSES).to(DEVICE)
+        if not os.path.exists(model_load_path):
+             raise FileNotFoundError(f"Model file not found at {model_load_path}. Please train the model.")
+        model.load_state_dict(torch.load(model_load_path, map_location=DEVICE))
+        model.eval() # Set model to evaluation mode
+        print("Model loaded successfully.")
+    except FileNotFoundError as e:
+        print(f"ERROR: {e}")
+        model = None
+    except Exception as e:
+        print(f"ERROR: Failed to load model: {type(e).__name__} - {e}")
+        model = None
+else:
+     print("ERROR: Model class not imported, cannot load model.")
+
+
+# --- Ensure Upload Directory Exists ---
+# Ensure UPLOAD_FOLDER path is relative to where uvicorn runs (phase_2)
+upload_dir_path = os.path.join(os.getcwd(), UPLOAD_FOLDER) if os.path.basename(os.getcwd()) == 'phase_2' else UPLOAD_FOLDER
+os.makedirs(upload_dir_path, exist_ok=True)
+
+# --- Routes ---
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    """Render the home page with upload form"""
-    return templates.TemplateResponse("upload.html", {
-        "request": request,
-        "model_loaded": model_loaded
-    })
+    """Serves the main upload page."""
+    if not templates:
+         return HTMLResponse("Server Configuration Error: Templates not loaded.", status_code=500)
+    return templates.TemplateResponse("upload.html", {"request": request})
 
-@app.post("/upload_dicom")
-async def upload_dicom(request: Request, background_tasks: BackgroundTasks, 
-                       file: UploadFile = File(...)):
-    """
-    Upload a DICOM file and start processing in the background
-    """
-    # Generate unique ID for this task
-    task_id = str(uuid.uuid4())
-    
-    # Create folder for this task
-    task_folder = UPLOAD_FOLDER / task_id
-    task_folder.mkdir(exist_ok=True)
-    
-    # Save file
-    file_path = task_folder / file.filename
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
-    # Initialize task status
-    task_status[task_id] = {
-        "status": "processing",
-        "progress": 0,
-        "message": "Starting processing..."
-    }
-    
-    # Start background processing
-    background_tasks.add_task(
-        process_dicom_task, 
-        task_id=task_id,
-        file_path=str(file_path),
-        model=model,
-        device=device
-    )
-    
-    # Return task_id for client to check status
-    return {"task_id": task_id}
+# --- Endpoint for ZIP file upload ---
+@app.post("/predict_patient", response_class=HTMLResponse)
+async def predict_patient(request: Request, file: UploadFile = File(...)):
+    """Handles ZIP file upload containing DICOMs, runs inference, returns results."""
+    if not model:
+        return HTMLResponse("Server Error: Model not available.", status_code=503)
+    if not templates:
+         return HTMLResponse("Server Configuration Error: Templates not loaded.", status_code=500)
+    if not full_inference_with_explanation:
+         return HTMLResponse("Server Configuration Error: Inference function not available.", status_code=500)
 
-@app.get("/status/{task_id}")
-async def get_task_status(task_id: str):
-    """Check the status of a processing task"""
-    if task_id not in task_status:
-        return JSONResponse(
-            status_code=404,
-            content={"error": "Task not found"}
-        )
-    
-    return task_status[task_id]
+    # Basic check for ZIP file type
+    if not file.filename.lower().endswith(".zip"):
+         return templates.TemplateResponse("result.html", {
+             "request": request, "stage": "Error: Invalid file type. Please upload a .zip file.",
+             "ct_image_url": None, "gradcam_image_url": None, "shap_image_url": None # Pass None for URLs
+         }, status_code=400)
 
-@app.get("/results/{task_id}", response_class=HTMLResponse)
-async def get_results(request: Request, task_id: str):
-    """View results of a completed task"""
-    if task_id not in task_status or task_status[task_id]["status"] != "completed":
-        return templates.TemplateResponse("processing.html", {
-            "request": request,
-            "task_id": task_id
-        })
-    
-    result_data = task_status[task_id]["results"]
-    
-    return templates.TemplateResponse("result.html", {
-        "request": request,
-        "prediction": result_data["prediction"],
-        "stage": result_data["stage"],
-        "probability": result_data["probability"],
-        "heatmap_path": result_data["heatmap_path"]
-    })
+    # Define paths relative to phase_2 (where uvicorn runs)
+    upload_dir = UPLOAD_FOLDER
+    output_dir = OUTPUT_FOLDER
 
-async def process_dicom_task(task_id: str, file_path: str, model, device):
-    """
-    Process DICOM files in the background and update task status
-    """
+    # Generate a unique subfolder name for extraction within uploads/
+    timestamp = f"{int(time.time())}_{np.random.randint(1000):03d}"
+    base_filename = os.path.splitext(file.filename)[0]
+    safe_base_filename = "".join(c if c.isalnum() or c in ('_','-') else '_' for c in base_filename)
+    extraction_folder = os.path.join(upload_dir, f"{safe_base_filename}_{timestamp}") # e.g., uploads/PatientX_12345
+    zip_save_path = f"{extraction_folder}.zip"
+
+    extraction_folder_abs = os.path.abspath(extraction_folder) # Use absolute path for processing
+    output_dir_abs = os.path.abspath(output_dir)
+
     try:
-        # Update status
-        task_status[task_id]["progress"] = 10
-        task_status[task_id]["message"] = "Loading DICOM files..."
-        
-        # Get DICOM directory (assuming file_path is a DICOM file in a series)
-        dicom_dir = os.path.dirname(file_path)
-        
-        # Update status
-        task_status[task_id]["progress"] = 30
-        task_status[task_id]["message"] = "Running model inference..."
-        
-        # Run inference
-        predicted_class, class_probabilities, heatmap_path = full_inference_with_explanation(
-            dicom_dir, 
-            model_path=MODEL_PATH if model is None else None  # Only pass path if model not loaded
-        )
-        
-        # Update status
-        task_status[task_id]["progress"] = 90
-        task_status[task_id]["message"] = "Finalizing results..."
-        
-        # Prepare results
-        # Map predicted class to diagnosis (modify based on your model's classes)
-        diagnosis_map = {
-            0: "No Pulmonary Infarction",
-            1: "Pulmonary Infarction"
-        }
-        
-        # Map to stage (modify based on your staging logic)
-        stage_map = {
-            0: "N/A",
-            1: "Stage I"  # Add more stages as needed
-        }
-        
-        prediction = diagnosis_map.get(predicted_class, "Unknown")
-        stage = stage_map.get(predicted_class, "Unknown")
-        
-        # Store results
-        task_status[task_id]["results"] = {
-            "prediction": prediction,
-            "stage": stage,
-            "probability": float(class_probabilities[predicted_class]),
-            "heatmap_path": heatmap_path
-        }
-        
-        # Mark as completed
-        task_status[task_id]["status"] = "completed"
-        task_status[task_id]["progress"] = 100
-        task_status[task_id]["message"] = "Processing completed"
-        
+        os.makedirs(upload_dir, exist_ok=True)
+        print(f"Saving uploaded ZIP to: {zip_save_path}")
+        # Save uploaded zip file temporarily
+        with open(zip_save_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Extract the zip file
+        print(f"Extracting ZIP to: {extraction_folder_abs}")
+        os.makedirs(extraction_folder_abs, exist_ok=True)
+        with zipfile.ZipFile(zip_save_path, 'r') as zip_ref:
+            # Check for nested structures or extract directly
+            zip_ref.extractall(extraction_folder_abs)
+        print("Extraction complete.")
+
+    except zipfile.BadZipFile:
+        print(f"Error: Uploaded file is not a valid ZIP archive: {file.filename}")
+        # Clean up zip if extraction failed
+        if os.path.exists(zip_save_path): os.remove(zip_save_path)
+        if os.path.exists(extraction_folder_abs): shutil.rmtree(extraction_folder_abs)
+        return templates.TemplateResponse("result.html", {
+             "request": request, "stage": "Error: Invalid ZIP file.",
+             "ct_image_url": None, "gradcam_image_url": None, "shap_image_url": None
+         }, status_code=400)
     except Exception as e:
-        task_status[task_id]["status"] = "error"
-        task_status[task_id]["message"] = f"Error: {str(e)}"
-        print(f"Error processing task {task_id}: {e}")
+        print(f"Error handling upload/extraction: {type(e).__name__} - {e}")
+        # Clean up
+        if os.path.exists(zip_save_path): os.remove(zip_save_path)
+        if os.path.exists(extraction_folder_abs): shutil.rmtree(extraction_folder_abs)
+        return templates.TemplateResponse("result.html", {
+             "request": request, "stage": f"Error processing upload: {e}",
+             "ct_image_url": None, "gradcam_image_url": None, "shap_image_url": None
+         }, status_code=500)
+    finally:
+        await file.close()
+        # Clean up the temporary zip file NOW
+        if os.path.exists(zip_save_path):
+            try:
+                print(f"Removing temporary ZIP file: {zip_save_path}")
+                os.remove(zip_save_path)
+            except Exception as e_clean:
+                print(f"Error removing temp zip {zip_save_path}: {e_clean}")
+
+
+    # --- Run Inference ---
+    heatmap_url = None
+    shap_url = None
+    ct_url = None
+    stage_result = "Error: Inference failed"
+    pred_result = -1
+
+    try:
+        # Check if extraction folder actually contains files/subdirs (better check needed if nested)
+        if not os.listdir(extraction_folder_abs):
+             raise ValueError("Extracted folder is empty.")
+
+        # Call the inference function with absolute paths for clarity
+        pred_result, stage_result, ct_fname, gradcam_fname, shap_fname = \
+            full_inference_with_explanation(
+                model=model,
+                dicom_folder=extraction_folder_abs,  # Pass the directory containing DICOMs
+                output_folder=output_dir_abs  # Save images to absolute ./outputs/ path
+            )
+
+        # Convert filenames (relative to output_dir) to URL paths
+        ct_url = f"/{OUTPUT_FOLDER}/{ct_fname}" if ct_fname else None
+        heatmap_url = f"/{OUTPUT_FOLDER}/{gradcam_fname}" if gradcam_fname else None
+        shap_url = f"/{OUTPUT_FOLDER}/{shap_fname}" if shap_fname else None
+
+        print(f"Inference processing complete. Stage: {stage_result}")
+        # --- Add Explanation Text Generation ---
+        explanation_text = f"The model's prediction is '{stage_result}'. "
+        if heatmap_url and shap_url:
+            explanation_text += "Grad-CAM highlights the general input regions the model focused on. SHAP shows the specific contribution of each pixel (Red increases likelihood of prediction, Blue decreases)."
+        elif heatmap_url:
+            explanation_text += "Grad-CAM highlights the general input regions the model focused on for this prediction."
+        elif shap_url:
+            explanation_text += "SHAP shows the contribution of each pixel (Red increases likelihood of prediction, Blue decreases)."
+        else:
+            explanation_text += "No visual explanations were successfully generated."
+    except Exception as e_infer:
+        print(f"ERROR during inference call: {type(e_infer).__name__} - {e_infer}")
+        traceback.print_exc()  # Log full traceback for server logs
+        stage_result = f"Error during diagnosis: {e_infer}"
+
+    finally:
+        # --- Clean up the extracted folder ---
+        try:
+            if os.path.isdir(extraction_folder_abs):
+                print(f"Removing extracted folder: {extraction_folder_abs}")
+                shutil.rmtree(extraction_folder_abs)
+        except Exception as e_clean_dir:
+            print(f"Error removing extracted folder {extraction_folder_abs}: {e_clean_dir}")

@@ -1,18 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Prediction Result</title>
+    <title>Diagnosis Result</title>
+    <style>
+        /* ... (Keep all existing styles from the previous version) ... */
+        .explanation-text { /* New style block */
+            margin-top: 25px;
+            padding: 15px;
+            background-color: rgba(60, 60, 60, 0.7); /* Slightly different background */
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+        .explanation-text h3 { margin-top: 0; margin-bottom: 10px; color: #eee; border-bottom: none; padding-bottom: 0;}
+        .explanation-text p { font-size: 0.95em; color: #ddd; line-height: 1.5; margin: 0;}
+    </style>
 </head>
 <body>
-    <h2>Prediction Result 🎯</h2>
-    <p><strong>Prediction:</strong> {{ prediction }}</p>
-    <p><strong>Stage:</strong> {{ stage }}</p>
-    
-    <h3>Heatmap 🔥:</h3>
-    <img src="{{ heatmap_path }}" alt="Heatmap" style="max-width: 500px;">
-    
-    <br><br>
-    <a href="/">Upload another file</a>
+    <div class="container">
+        <div class="ct-column">
+            <h3>Input CT Slice</h3>
+            {% if ct_image_url %}
+                <img src="{{ ct_image_url }}" alt="Input CT Slice">
+            {% else %}
+                <p class="error">Could not load input CT image.</p>
+            {% endif %}
+        </div>
+        <div class="info-column">
+            <div class="info-panel">
+                <h2>Prediction Result</h2>
+                 {% if stage and "Error:" in stage %}
+                    <p class="error">{{ stage }}</p>
+                 {% else %}
+                    <p><span class="label">Condition:</span> <span class="stage">{{ stage or "N/A" }}</span></p>
+                 {% endif %}
+                <a href="/" class="predict-button">Make Another Prediction</a>
+            </div>
+
+            {% if explanation %}
+            <div class="explanation-text">
+                <h3>Interpretation Guide</h3>
+                <p>{{ explanation }}</p>
+            </div>
+            {% endif %}
+            <div class="explanation-images">
+                {% if gradcam_image_url %}
+                    <figure>
+                         <h3>Grad-CAM Explanation</h3>
+                        <img src="{{ gradcam_image_url }}" alt="Grad-CAM Explanation">
+                        <figcaption>Highlights regions influencing prediction</figcaption>
+                    </figure>
+                {% endif %}
+                {% if shap_image_url %}
+                    <figure>
+                         <h3>SHAP Explanation</h3>
+                        <img src="{{ shap_image_url }}" alt="SHAP Explanation">
+                        <figcaption>Pixel Importance (Red=More Likely Stage, Blue=Less Likely)</figcaption>
+                    </figure>
+                 {% endif %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>
