@@ -13,7 +13,7 @@ try:
     SHAP_AVAILABLE = True
 except ImportError:
     SHAP_AVAILABLE = False
-    print("Warning: 'shap' library not installed. SHAP explanations will be skipped.")
+    print("Warning: 'shap' library not installed. SHAP explanations will be skipped.") #change result.html
 
 from src.utils.dicom_loader import load_dicom_volume, get_views
 from src.xai.grad_cam import GradCAM # Uses the modified GradCAM class now
