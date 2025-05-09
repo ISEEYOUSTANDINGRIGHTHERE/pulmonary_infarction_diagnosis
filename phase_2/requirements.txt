@@ -12,3 +12,11 @@ scikit-learn
 scipy
 jinja2
 pandas
+
+
+#command to install the requirements and run the server.
+#->python -m venv venv
+#->env\Scripts\activate
+#->docker build -t pi-fastapi .
+#->docker run -d -p 8000:8000 --name pi-container pi-fastapi
+#->uvicorn app.api_server:app --reload
