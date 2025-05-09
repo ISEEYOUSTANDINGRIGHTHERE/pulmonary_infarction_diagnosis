@@ -1,5 +1,3 @@
-# src/xai/grad_cam.py
-
 import torch
 import numpy as np
 import torch.nn.functional as F # Make sure F is imported
@@ -47,11 +45,11 @@ class GradCAM:
         if self.gradients is None or self.activations is None:
              print("ERROR: Gradients or Activations not captured by hooks.")
              # Return a dummy shape consistent with previous logs if possible
-             # Get expected H, W from input tensor spatial dims if activations failed early
+             # Get expected H, W from input tensor spatial dims if activations failed early- imp to notice
              h, w = input_tensor.shape[-2:]
-             return np.zeros((h // 4, w // 4)) # Example dummy shape
+             return np.zeros((h // 4, w // 4)) # Example dummy shape for explanation
 
-        # --- **** MODIFICATION HERE **** ---
+        # --- **** MODIFICATION HERE **** --- as asked by kumar sir
         # Calculate weights using ReLU on gradients first (positive influence)
         positive_gradients = F.relu(self.gradients)
         pooled_gradients = torch.mean(positive_gradients, dim=[0, 2, 3, 4])  # Shape: [C]

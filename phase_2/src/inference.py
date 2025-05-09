@@ -135,7 +135,7 @@ def full_inference_with_explanation(model, dicom_folder, output_folder):
                 print("SHAP GradientExplainer created.")
 
                 # --- 3. Compute SHAP values ---
-                num_shap_samples = 50
+                num_shap_samples = 10 #can be adjusted but for a 5d sensor volume 50, is what we should be using. 
                 print(f"Calculating SHAP values for input shape {axial_tensor.shape} using nsamples={num_shap_samples}...")
                 shap_values_output = explainer.shap_values(axial_tensor, nsamples=num_shap_samples)
                 print(f"SHAP values calculated. Output type: {type(shap_values_output)}") # Will be <class 'numpy.ndarray'>
@@ -158,7 +158,7 @@ def full_inference_with_explanation(model, dicom_folder, output_folder):
 
                 # --- 5. Prepare Slices for Visualization ---
                 print(f"SHAP values for pred shape before slicing: {shap_values_for_pred.shape}")
-                # *** THE FIX IS HERE: REMOVE .cpu().numpy() ***
+                # *** THE FIX IS HERE: REMOVE .cpu().numpy() *** if we face any issues with the SHAP values.
                 shap_slice_np = shap_values_for_pred[0, 0, display_slice_index]
                 # *** END FIX ***
                 print(f"Extracted SHAP slice shape: {shap_slice_np.shape}")

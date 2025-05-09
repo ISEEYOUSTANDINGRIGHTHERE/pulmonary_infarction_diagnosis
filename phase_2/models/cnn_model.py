@@ -19,7 +19,7 @@ class PulmonaryInfarction3DCNN(nn.Module):
         
         self.dropout = nn.Dropout(0.3)
         
-        self.fc1 = nn.Linear(128 * 8 * 16 * 16, 512)  # depends on our final spatial dims
+        self.fc1 = nn.Linear(128 * 8 * 16 * 16, 512)  # depends on our final spatial dims but for now assume 128*8*16*16
         self.fc2 = nn.Linear(512, num_classes)
 
     def forward(self, x):
