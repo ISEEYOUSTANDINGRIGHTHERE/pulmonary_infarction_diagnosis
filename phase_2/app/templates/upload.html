@@ -6,105 +6,41 @@
     <title>Pulmonary Infarction Detection - Upload</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #282c34; /* Fallback background */
-            overflow: hidden; /* Hide scrollbars from video */
+        body, html { /* Keep your styles */
+            height: 100%; margin: 0; font-family: Arial, Helvetica, sans-serif;
+            background-color: #282c34; overflow: hidden;
         }
-
-        .bg-video {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            z-index: -1;
-            overflow: hidden;
+        .bg-video { /* Keep your styles */
+            position: fixed; right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            z-index: -1; overflow: hidden;
         }
-        .bg-video video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
+        .bg-video video { /* Keep your styles */
+            position: absolute; top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto;
             transform: translateX(-50%) translateY(-50%);
         }
-
-        .container-custom {
-            position: relative;
-            z-index: 1;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            color: white;
-            text-align: center;
+        .container-custom { /* Keep your styles */
+            position: relative; z-index: 1; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; padding: 20px; color: white; text-align: center;
         }
-
-        .card-custom {
-            background: rgba(30, 30, 40, 0.85);
-            padding: 40px; /* More padding */
-            border-radius: 15px;
-            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.7);
-            width: 100%;
-            max-width: 550px; /* Adjust width as needed */
-            border: 1px solid #444;
+        .card-custom { /* Keep your styles */
+            background: rgba(30, 30, 40, 0.85); padding: 40px; border-radius: 15px;
+            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.7); width: 100%;
+            max-width: 550px; border: 1px solid #444;
         }
-        .card-custom h1 {
-            font-size: 1.8em;
-            margin-bottom: 15px;
-            color: #61afef;
-         }
-        .card-custom .lead {
-            font-size: 1.1em;
-            margin-bottom: 30px;
-            color: #ccc;
-        }
-        .form-control-file {
-            background-color: #333;
-            color: #fff;
-            border-color: #555;
-            padding: 10px;
-            border-radius: 5px;
-            display: block; /* Make it block */
-            width: 100%; /* Full width */
-            margin-bottom: 25px; /* Space below file input */
-        }
-        .form-control-file:focus {
-            background-color: #444;
-            color: #fff;
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-        }
-        label { color: #ccc; margin-bottom: 0.5rem; display: block; text-align: left;}
-
-
-        .btn-diagnose { /* Custom class for diagnose button */
-            background-color: #007bff;
-            border-color: #007bff;
-            padding: 12px 25px;
-            font-size: 1.2em; /* Larger button text */
-            width: 100%;
-        }
-        .btn-diagnose:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
+        /* ... other styles ... */
     </style>
 </head>
 <body>
     <div class="bg-video">
-        <video autoplay muted loop>
-            <source src="{{ url_for('static', path='background-video.mp4') }}" type="video/mp4">
+        <video controls width="640" height="360" style="z-index: 1000; position: relative; border: 2px solid red;">
+            <source src="C:\Users\Akash\OneDrive\Documents\GitHub\pulmonary_infarction_diagnosis\phase_2\app\static\background-video.mp4" type="video/mp4">
             Your browser does not support HTML5 video.
         </video>
-    </div>
+        </div>
 
     <div class="container-custom">
         <div class="card-custom">
