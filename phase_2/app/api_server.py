@@ -216,7 +216,7 @@ async def handle_prediction(request: Request, file: UploadFile = File(...)):
         print(f"Outputting generated images to: {output_dir_abs_for_inference}")
 
         _, stage_result, ct_fname, gradcam_fname, shap_fname = \
-            full_inference_with_explanation(model, actual_dicom_folder_for_inference, output_dir_abs_for_inference, DEVICE)
+            full_inference_with_explanation(model, actual_dicom_folder_for_inference, output_dir_abs_for_inference,)
 
         if "Error:" not in stage_result and stage_result is not None:
             explanation_text = f"The model's prediction is '{stage_result}'. "

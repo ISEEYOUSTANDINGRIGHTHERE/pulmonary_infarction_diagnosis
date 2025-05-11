@@ -1,78 +1,259 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Diagnosis Result</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosis Result - Pulmonary Infarction</title>
     <style>
-        body { margin: 0; font-family: Arial, sans-serif; background-color: #282c34; color: #eee; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px; box-sizing: border-box; }
-        .container { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 40px; width: 100%; max-width: 1400px; }
-        .ct-column { flex: 1.7; min-width: 400px; max-width: 700px; text-align: center; }
-        .ct-column img { width: 100%; border-radius: 8px; background-color: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: block; }
-        .ct-column h3 { color: #bbb; margin-bottom: 15px; padding-bottom: 8px; font-weight: normal; text-align: left; }
-        .info-column { flex: 1; min-width: 320px; max-width: 500px; display: flex; flex-direction: column; gap: 25px; }
-        .info-panel { background-color: rgba(50, 50, 50, 0.9); padding: 20px 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid #444; }
-        .info-panel h2 { margin-top: 0; color: #61afef; border-bottom: 1px solid #555; padding-bottom: 12px; text-align: center; font-size: 1.5em; }
-        .info-panel p { margin: 15px 0; font-size: 1.1em; }
-        .info-panel .label { font-weight: bold; color: #aaa; }
-        .info-panel .stage { font-weight: bold; font-size: 1.4em; color: #fff; display: block; text-align: center; margin-top: 8px; padding: 5px; background-color: rgba(0,0,0,0.2); border-radius: 4px; }
-        .predict-button { display: block; margin-top: 25px; padding: 12px 20px; background-color: #0288d1; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; text-align: center; font-size: 1.1em; transition: background-color 0.2s ease; }
-        .predict-button:hover { background-color: #0277bd; }
-        .explanation-text { background-color: rgba(50, 50, 50, 0.9); padding: 15px 20px; border-radius: 8px; border: 1px solid #444; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .explanation-text h3 { margin-top: 0; margin-bottom: 10px; color: #ccc; border-bottom: 1px solid #555; padding-bottom: 8px; font-size: 1.1em;}
-        .explanation-text p { font-size: 0.95em; color: #ddd; line-height: 1.5; margin: 0;}
-        .explanation-images { display: flex; flex-direction: column; gap: 25px; background-color: rgba(50, 50, 50, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid #444; }
-        .explanation-images figure { margin: 0; padding: 0; text-align: center; }
-        .explanation-images img { width: 100%; border: 1px solid #4a4a4a; border-radius: 5px; background-color: #111; display: block; }
-        .explanation-images figcaption { font-size: 0.9em; color: #ccc; margin-top: 8px; }
-        .explanation-images h3 { margin-top: 0; margin-bottom: 10px; color: #ccc; border-bottom: 1px solid #555; padding-bottom: 8px; font-size: 1.1em;}
-        .error { color: #ff9e9e; font-weight: bold; font-size: 1.2em; text-align: center; background-color: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; }
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
+            overflow-x: hidden; /* Prevent horizontal scroll if content is too wide */
+            overflow-y: auto;   /* Allow vertical scroll for content */
+        }
+
+        .bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000; /* Keep it well behind everything */
+            overflow: hidden;
+        }
+        .bg-video video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh; /* Ensure it takes at least full viewport height */
+            padding: 70px 20px 40px 20px; /* Increased TOP padding, e.g., 70px */
+            box-sizing: border-box;
+            /* MAKE IT MORE TRANSPARENT - adjust alpha (last value) as needed */
+            /* Original was 0.85. Lower values = more video visibility. */
+            background-color: rgba(32, 35, 42, 0.65); /* Example: 65% opacity for page wrapper */
+        }
+
+        .result-container {
+            display: flex;
+            flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
+            gap: 30px;      /* Gap between columns */
+            max-width: 1600px; /* Max width of content */
+            margin: 0 auto;    /* Center the container */
+        }
+
+        .result-column {
+            /* MAKE COLUMNS MORE TRANSPARENT */
+            /* Original was 0.9. Lower values = more video visibility. */
+            background-color: rgba(40, 44, 52, 0.70); /* Example: 70% opacity for columns */
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45); /* Adjusted shadow */
+            border: 1px solid rgba(74, 79, 92, 0.4); /* Softer border, also semi-transparent */
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Gap between items within a column */
+        }
+
+        .left-column { flex: 1 1 280px; min-width: 260px; }
+        .center-column { flex: 2 1 500px; min-width: 320px; } /* Grad-CAM gets more space */
+        .right-column { flex: 1.2 1 320px; min-width: 300px; }
+
+        .image-card h3, .info-card h2 { /* Combined for main titles in cards/columns */
+            color: #90baff; /* Brighter accent color for titles */
+            margin-top: 0;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(74, 79, 92, 0.6);
+            font-weight: 600;
+            font-size: 1.2em;
+            letter-spacing: 0.5px;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            background-color: #181a1f; /* Slightly darker background for image area */
+            display: block;
+            border: 1px solid rgba(74, 79, 92, 0.5);
+        }
+        .image-card figcaption {
+            font-size: 0.85em;
+            color: #b0b8c0; /* Softer caption color */
+            line-height: 1.4;
+            margin-top: 10px; /* Increased space for caption */
+            text-align: center;
+        }
+
+        /* Specific sizing hints */
+        .input-ct-image img { max-height: 250px; object-fit: contain; }
+        .grad-cam-image img { /* No specific height constraint, let it be large */ }
+        .shap-image img { max-height: 300px; object-fit: contain; }
+
+
+        .info-card p {
+            margin: 0 0 12px 0; /* Slightly more bottom margin for paragraphs */
+            font-size: 0.95em;
+            line-height: 1.65;
+            color: #ced2d6; /* Brighter paragraph text */
+        }
+        .info-card p:last-child { margin-bottom: 0; }
+
+        .info-card .label { font-weight: 600; color: #b0b8c0; }
+        .info-card .stage {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #ffffff;
+            display: inline-block;
+            margin-left: 8px;
+            padding: 6px 12px; /* Slightly more padding */
+            background-color: rgba(60, 65, 75, 0.5); /* Darker, semi-transparent stage bg */
+            border-radius: 5px;
+            border: 1px solid rgba(90,95,105,0.5);
+        }
+        .info-card .stage.error-stage {
+             display: block;
+             background-color: rgba(220, 53, 69, 0.2); /* Bootstrap danger, adjusted opacity */
+             color: #f8d7da;
+             border: 1px solid rgba(220, 53, 69, 0.4);
+             font-size: 1em; padding: 12px; width: 100%;
+             text-align: center; box-sizing: border-box; margin-left: 0;
+        }
+
+        .predict-button {
+            display: block; margin-top: 25px; padding: 12px 20px; /* Larger button */
+            background-color: #007bff; color: white; text-decoration: none;
+            border: none; border-radius: 6px; cursor: pointer; text-align: center;
+            font-size: 1.05em; font-weight: 500;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .predict-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .error-message-general {
+            color: #f8d7da; font-weight: 500; font-size: 1em; text-align: center;
+            background-color: rgba(220, 53, 69, 0.1); padding: 10px;
+            border-radius: 5px; border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+        .no-visuals-note p { text-align: center; color: #a8aeb3; font-style: italic; padding: 10px 0;}
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .center-column { flex: 1.5 1 400px; }
+        }
+        @media (max-width: 992px) {
+            .page-wrapper { padding-top: 50px; } /* Less top padding on smaller screens */
+            .result-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .left-column, .center-column, .right-column {
+                min-width: 100%;
+                margin-bottom: 25px;
+            }
+            .left-column:last-child, .center-column:last-child, .right-column:last-child {
+                margin-bottom: 0;
+            }
+        }
+        @media (max-width: 576px) { /* Extra small screens */
+            body { padding: 0; } /* Remove body padding, page-wrapper handles it */
+            .page-wrapper { padding: 20px 10px; }
+            .result-column { padding: 15px; }
+            .image-card h3, .info-card h2 { font-size: 1.05em; margin-bottom: 12px; padding-bottom: 8px;}
+            .predict-button { padding: 10px 15px; font-size: 1em;}
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="ct-column">
-            <h3>Input CT Slice</h3>
-            {% if ct_image_url %}
-                <img src="{{ ct_image_url }}" alt="Input CT Slice">
-            {% else %}
-                <p class="error">Could not load input CT image.</p>
-            {% endif %}
-        </div>
-        <div class="info-column">
-            <div class="info-panel">
-                <h2>Prediction Result</h2>
-                 {% if stage and "Error:" in stage %}
-                    <p class="error">{{ stage }}</p>
-                 {% else %}
-                    <p><span class="label">Condition:</span> <span class="stage">{{ stage or "N/A" }}</span></p>
-                 {% endif %}
-                <a href="/" class="predict-button">Make Another Prediction</a>
-            </div>
+    <div class="bg-video">
+        <video autoplay muted loop playsinline>
+            <source src="/static/Background-Result.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
 
-            {% if explanation %}
-            <div class="explanation-text">
-                <h3>Interpretation Guide</h3>
-                <p>{{ explanation }}</p>
-            </div>
-            {% endif %}
+    <div class="page-wrapper">
+        <div class="result-container">
 
-            <div class="explanation-images">
-                {% if gradcam_image_url %}
-                    <figure>
-                         <h3>Grad-CAM Explanation</h3>
-                        <img src="{{ gradcam_image_url }}" alt="Grad-CAM Explanation">
-                        <figcaption>Highlights regions influencing prediction</figcaption>
-                    </figure>
-                {% endif %}
+            <div class="result-column left-column">
+                <div class="image-card input-ct-image">
+                    <h3>Input CT Slice</h3>
+                    {% if ct_image_url %}
+                        <img src="{{ ct_image_url }}" alt="Input CT Slice">
+                    {% else %}
+                        <p class="error-message-general">Could not load input CT image.</p>
+                    {% endif %}
+                </div>
                 {% if shap_image_url %}
-                    <figure>
-                         <h3>SHAP Explanation</h3>
-                        <img src="{{ shap_image_url }}" alt="SHAP Explanation">
-                        <figcaption>Pixel Importance (Red=More Likely, Blue=Less Likely)</figcaption>
-                    </figure>
-                 {% endif %}
-                 {% if not gradcam_image_url and not shap_image_url and stage and "Error:" not in stage %}
-                    <p style="text-align: center; color: #aaa;">No visual explanations were generated for this prediction.</p>
-                 {% endif %}
+                <div class="image-card shap-image">
+                    <h3>SHAP Values</h3>
+                    <img src="{{ shap_image_url }}" alt="SHAP Explanation">
+                    <figcaption>Pixel Importance (Red=Positive, Blue=Negative)</figcaption>
+                </div>
+                {% endif %}
             </div>
+
+            <div class="result-column center-column">
+                {% if gradcam_image_url %}
+                <div class="image-card grad-cam-image">
+                    <h3>Grad-CAM Explanation</h3>
+                    <img src="{{ gradcam_image_url }}" alt="Grad-CAM Explanation">
+                    <figcaption>Highlights regions influencing prediction</figcaption>
+                </div>
+                {% else %}
+                    {% if stage and "Error:" not in stage and stage and not shap_image_url %}
+                    <div class="info-card no-visuals-note">
+                         <p>No primary visual explanation (Grad-CAM) was generated.</p>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="result-column right-column">
+                <div class="info-card prediction-panel">
+                    <h2>Prediction Result</h2>
+                    {% if stage and "Error:" in stage %}
+                        <p class="stage error-stage">{{ stage }}</p>
+                    {% elif stage %}
+                        <p><span class="label">Condition:</span> <span class="stage">{{ stage }}</span></p>
+                    {% else %}
+                         <p><span class="label">Condition:</span> <span class="stage">N/A</span></p>
+                    {% endif %}
+                    <a href="/" class="predict-button">Make Another Prediction</a>
+                </div>
+
+                {% if explanation %}
+                <div class="info-card interpretation-guide">
+                    <h3>Interpretation Guide</h3>
+                    <p>{{ explanation }}</p>
+                </div>
+                {% endif %}
+
+                {% if not gradcam_image_url and not shap_image_url and stage and "Error:" not in stage and stage %}
+                <div class="info-card no-visuals-note">
+                    <p>No visual explanations (Grad-CAM or SHAP) were generated for this prediction.</p>
+                </div>
+                {% endif %}
+            </div>
+
         </div> </div> </body>
 </html>
