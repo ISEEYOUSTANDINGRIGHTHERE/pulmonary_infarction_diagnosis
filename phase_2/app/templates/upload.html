@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload DICOM ZIP</title> <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-            body {
-            font-family: Arial, sans-serif;
-            background-color: #eef3f7;
-            text-align: center;
-            padding-top: 100px;
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: {% if image_url %} url('{{ image_url }}') no-repeat center center fixed; {% else %} #f8f9fa; {% endif %}
+            background-size: cover;
+            color: black;
         }
-        .box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            display: inline-block;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+        .container {
+            margin-top: 50px;
         }
-        input[type="file"] {
-            margin: 20px 0;
+        .card {
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
         }
-        button {
-            padding: 10px 20px;
-            background-color: #0288d1;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
         }
-        button:hover {
-            background-color: #0277bd;
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
         }
     </style>
 </head>
