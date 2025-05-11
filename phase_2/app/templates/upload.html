@@ -3,42 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
+    <title>Pulmonary Infarction Detection - Upload</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body, html {
             height: 100%;
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: {% if image_url %} url('{{ image_url }}') no-repeat center center fixed; {% else %} #f8f9fa; {% endif %}
-            background-size: cover;
-            color: black;
+            background-color: #282c34; /* Fallback background */
+            overflow: hidden; /* Hide scrollbars from video */
         }
-        .container {
-            margin-top: 50px;
+
+        .bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
-        .card {
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        .bg-video video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
         }
-        .btn-primary {
+
+        .container-custom {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .card-custom {
+            background: rgba(30, 30, 40, 0.85);
+            padding: 40px; /* More padding */
+            border-radius: 15px;
+            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 550px; /* Adjust width as needed */
+            border: 1px solid #444;
+        }
+        .card-custom h1 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #61afef;
+         }
+        .card-custom .lead {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+        .form-control-file {
+            background-color: #333;
+            color: #fff;
+            border-color: #555;
+            padding: 10px;
+            border-radius: 5px;
+            display: block; /* Make it block */
+            width: 100%; /* Full width */
+            margin-bottom: 25px; /* Space below file input */
+        }
+        .form-control-file:focus {
+            background-color: #444;
+            color: #fff;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        label { color: #ccc; margin-bottom: 0.5rem; display: block; text-align: left;}
+
+
+        .btn-diagnose { /* Custom class for diagnose button */
             background-color: #007bff;
             border-color: #007bff;
+            padding: 12px 25px;
+            font-size: 1.2em; /* Larger button text */
+            width: 100%;
         }
-        .btn-primary:hover {
+        .btn-diagnose:hover {
             background-color: #0056b3;
             border-color: #004085;
         }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Upload DICOM Files (as .zip archive)</h2>
-        <form action="/predict_patient" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept=".zip" required><br> <button type="submit">Diagnose</button>
-        </form>
+    <div class="bg-video">
+        <video autoplay muted loop>
+            <source src="{{ url_for('static', path='background-video.mp4') }}" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
     </div>
+
+    <div class="container-custom">
+        <div class="card-custom">
+            <h1>Pulmonary Infarction Detection</h1>
+            <p class="lead">Upload a ZIP archive containing DICOM (.dcm) files for diagnosis.</p>
+            <form action="/predict_patient" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="dicom_zip">DICOM ZIP File</label>
+                    <input type="file" class="form-control-file" id="dicom_zip" name="file" accept=".zip" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-diagnose">Diagnose</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

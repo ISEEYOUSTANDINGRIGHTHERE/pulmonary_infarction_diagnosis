@@ -3,16 +3,28 @@
 <head>
     <title>Diagnosis Result</title>
     <style>
-        /* ... (Keep all existing styles from the previous version) ... */
-        .explanation-text { /* New style block */
-            margin-top: 25px;
-            padding: 15px;
-            background-color: rgba(60, 60, 60, 0.7); /* Slightly different background */
-            border-radius: 8px;
-            border: 1px solid #555;
-        }
-        .explanation-text h3 { margin-top: 0; margin-bottom: 10px; color: #eee; border-bottom: none; padding-bottom: 0;}
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #282c34; color: #eee; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px; box-sizing: border-box; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 40px; width: 100%; max-width: 1400px; }
+        .ct-column { flex: 1.7; min-width: 400px; max-width: 700px; text-align: center; }
+        .ct-column img { width: 100%; border-radius: 8px; background-color: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: block; }
+        .ct-column h3 { color: #bbb; margin-bottom: 15px; padding-bottom: 8px; font-weight: normal; text-align: left; }
+        .info-column { flex: 1; min-width: 320px; max-width: 500px; display: flex; flex-direction: column; gap: 25px; }
+        .info-panel { background-color: rgba(50, 50, 50, 0.9); padding: 20px 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid #444; }
+        .info-panel h2 { margin-top: 0; color: #61afef; border-bottom: 1px solid #555; padding-bottom: 12px; text-align: center; font-size: 1.5em; }
+        .info-panel p { margin: 15px 0; font-size: 1.1em; }
+        .info-panel .label { font-weight: bold; color: #aaa; }
+        .info-panel .stage { font-weight: bold; font-size: 1.4em; color: #fff; display: block; text-align: center; margin-top: 8px; padding: 5px; background-color: rgba(0,0,0,0.2); border-radius: 4px; }
+        .predict-button { display: block; margin-top: 25px; padding: 12px 20px; background-color: #0288d1; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; text-align: center; font-size: 1.1em; transition: background-color 0.2s ease; }
+        .predict-button:hover { background-color: #0277bd; }
+        .explanation-text { background-color: rgba(50, 50, 50, 0.9); padding: 15px 20px; border-radius: 8px; border: 1px solid #444; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .explanation-text h3 { margin-top: 0; margin-bottom: 10px; color: #ccc; border-bottom: 1px solid #555; padding-bottom: 8px; font-size: 1.1em;}
         .explanation-text p { font-size: 0.95em; color: #ddd; line-height: 1.5; margin: 0;}
+        .explanation-images { display: flex; flex-direction: column; gap: 25px; background-color: rgba(50, 50, 50, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid #444; }
+        .explanation-images figure { margin: 0; padding: 0; text-align: center; }
+        .explanation-images img { width: 100%; border: 1px solid #4a4a4a; border-radius: 5px; background-color: #111; display: block; }
+        .explanation-images figcaption { font-size: 0.9em; color: #ccc; margin-top: 8px; }
+        .explanation-images h3 { margin-top: 0; margin-bottom: 10px; color: #ccc; border-bottom: 1px solid #555; padding-bottom: 8px; font-size: 1.1em;}
+        .error { color: #ff9e9e; font-weight: bold; font-size: 1.2em; text-align: center; background-color: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -42,6 +54,7 @@
                 <p>{{ explanation }}</p>
             </div>
             {% endif %}
+
             <div class="explanation-images">
                 {% if gradcam_image_url %}
                     <figure>
@@ -54,11 +67,12 @@
                     <figure>
                          <h3>SHAP Explanation</h3>
                         <img src="{{ shap_image_url }}" alt="SHAP Explanation">
-                        <figcaption>Pixel Importance (Red=More Likely Stage, Blue=Less Likely)</figcaption>
+                        <figcaption>Pixel Importance (Red=More Likely, Blue=Less Likely)</figcaption>
                     </figure>
                  {% endif %}
+                 {% if not gradcam_image_url and not shap_image_url and stage and "Error:" not in stage %}
+                    <p style="text-align: center; color: #aaa;">No visual explanations were generated for this prediction.</p>
+                 {% endif %}
             </div>
-        </div>
-    </div>
-</body>
+        </div> </div> </body>
 </html>
