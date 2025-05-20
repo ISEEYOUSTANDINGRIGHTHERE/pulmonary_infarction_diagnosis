@@ -1,3 +1,7 @@
 *.pth
 __pycache__/
 *.DS_Store
+.mypy_cache/3.12/_frozen_importlib_external.data.json
+.mypy_cache/3.12/__future__.data.json
+*.json
+.mypy_cache/3.12/_bisect.meta.json
