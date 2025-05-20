@@ -14,7 +14,7 @@ def preprocess_data(data):
 
 if __name__== "__main__":
     raw_data_path = r"D:\\PulmonaryInfarction\\multimodalpulmonaryembolismdataset\\ICD.csv" #can use path to csv outformat->check
-    processed_data_path = r"D:\\PulmonaryInfarction\\multimodalpulmonaryembolismdataset\\processed_multimodalpulmonaryembolismdataset.csv"
+    processed_data_path = r"C:\\Users\Akash\OneDrive\\Document\\GitHub\\pulmonary_infarction_diagnosis\\src\\processed_multimodalpulmonaryembolismdataset.csv"
 
     data = load_data(raw_data_path)
     data = preprocess_data(data)
