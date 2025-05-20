@@ -6,3 +6,4 @@ data/processed/*
 src/Untitled-2.py
 *.jpg
 *.npy
+phase_2/models/pulmonary_model.pth
